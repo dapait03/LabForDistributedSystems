@@ -5,25 +5,52 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @RestController
+@RequestMapping("/todos")
 public class SpringBootForUniApplication {
 
-	@GetMapping("/helloWorld/{name}")
-	public String helloWorld(@PathVariable String name) {
-		return "Hello World " + name;
-	}
+	private List<Todo> todos = new ArrayList<>();
 
-	@PutMapping("/helloWorld/{name}")
-	public String helloWorldPut(@PathVariable String name) {
-		return "Hello World Put " + name;
-	}
+    @PostMapping
+    public Todo createTodo(@RequestBody Todo todo) {
+        todos.add(todo);
+        return todo;
+    }
 
-	@DeleteMapping("/helloWorld/{name}")
-	public String helloWorldDelete(@PathVariable String name) {
-		return "Hello World Delete " + name;
-	}
+    @GetMapping
+    public List<Todo> getTodos() {
+        return todos;
+    }
 
-	public static void main(String[] args) {
-		SpringApplication.run(SpringBootForUniApplication.class, args);
-	}
+    @GetMapping("/{id}")
+    public Todo getTodoById(@PathVariable long id) {
+        Optional<Todo> optionalTodo = todos.stream()
+                .filter(todo -> todo.getId() == id)
+                .findFirst();
+        return optionalTodo.orElse(null);
+    }
+
+    @PutMapping("/{id}")
+    public Todo updateTodo(@PathVariable long id, @RequestBody Todo updatedTodo) {
+        Optional<Todo> optionalTodo = todos.stream()
+                .filter(todo -> todo.getId() == id)
+                .findFirst();
+        if (optionalTodo.isPresent()) {
+            Todo todo = optionalTodo.get();
+            todo.setTodo(updatedTodo.getTodo());
+            todo.setPriority(updatedTodo.getPriority());
+            return todo;
+        } else {
+            return null;
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public boolean deleteTodo(@PathVariable long id) {
+        return todos.removeIf(todo -> todo.getId() == id);
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(TodoController.class, args);
+    }
 
 }
