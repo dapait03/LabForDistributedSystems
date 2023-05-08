@@ -1,0 +1,40 @@
+version: '3.1'
+
+services:
+  app:
+    container_name: my-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_HOST=my-db
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=mydb
+      - DATABASE_USER=myuser
+      - DATABASE_PASSWORD=mypassword
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  postgresdb:
+    container_name: my-db
+    image: postgres
+    environment:
+      - POSTGRES_DB=mydb
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_USER=myuser
+    ports:
+      - 5432:5432
+
+  todobackend:
+    image: todobackend:v0.1
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgresdb
+
+  todoui:
+    image: todoui:v0.1
+    ports:
+      - 8090:8090
